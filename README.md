@@ -1,1 +1,2 @@
 # GAOKAO-SIMULATOR
+Gaokao Simulator is very fast game which give you high school feeling. You play ten round to choose study or relax. If you pick study in Chinese, Math, English, Social Studies, or Science, your score go up but stress also go much more. If you pick break like read extra book, do sport, or eat snack, stress go down but score not change. You must get total score to five hundred to go university before stress meter reach one hundred or your game is over early. Every choice will make final result different and it very challenge to keep study and feeling happy.
