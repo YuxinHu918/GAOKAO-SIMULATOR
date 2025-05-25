@@ -1,0 +1,127 @@
+"""
+Gaokao Simulator
+Player: a student child, 10 rounds total, 6 actions per round.
+“Study” actions increase score and stress; “Relax” actions decrease stress.
+Game ends early if stress ≥ 100, or after 10 rounds with a final pass/fail.
+"""
+
+# ---------- Global Configuration ----------
+# Maximum score per subject
+SCORE_CAP = {
+    'Chinese': 150,
+    'Math': 150,
+    'English': 150,
+    'Social Studies': 300,
+    'Science': 300
+}
+
+# Available actions: (Description, score change, stress change)
+ACTIONS = {
+    '1': ('Study Chinese',        10,  +5),
+    '2': ('Study Math',           12,  +5),
+    '3': ('Study English',        10,  +5),
+    '4': ('Study Social Studies', 15,  +8),
+    '5': ('Study Science',        15,  +8),
+    '6': ('Read Extracurricular Book',  0,  -10),
+    '7': ('Do Outdoor Exercise',        0,  -15),
+    '8': ('Play on Phone',              0,   -3),
+    '9': ('Eat Snack',                  0,   -8),
+}
+
+TOTAL_ROUNDS = 10          # total number of rounds
+CHOICES_PER_ROUND = 6      # actions allowed per round
+STRESS_MAX = 100           # stress threshold for burnout
+UNIVERSITY_THRESHOLD = 500 # score needed to “go to university”
+
+# ---------- Helper Functions ----------
+def display_status(round_no, scores, stress):
+    """Print current round, total score, and stress level."""
+    total_score = sum(scores.values())
+    print(f"\n—— Round {round_no} ——")
+    print(f"Total Score: {total_score}    Stress: {stress}\n")
+
+def list_actions():
+    """Print all available actions."""
+    print("Choose one of the following actions:")
+    for key in ACTIONS:
+        action_name = ACTIONS[key][0]
+        print(key + ". " + action_name, end="   ")
+    print()  # newline after listing
+
+def get_player_choice():
+    """Read player input; return valid action key or empty string."""
+    choice = input("Enter action number: ").strip()
+    return choice if choice in ACTIONS else ""
+
+def apply_action(choice, scores, stress):
+    """
+    Update scores and stress based on player choice,
+    then print the result of this action.
+    """
+    action_name, score_delta, stress_delta = ACTIONS[choice]
+    actual_gain = 0
+
+    # If it's a study action, find the matching subject and update its score
+    for subject in SCORE_CAP:
+        if subject in action_name:
+            before = scores[subject]
+            after = min(before + score_delta, SCORE_CAP[subject])
+            scores[subject] = after
+            actual_gain = after - before
+            break
+
+    # Update stress (not below zero)
+    new_stress = max(0, stress + stress_delta)
+
+    # Print feedback
+    if score_delta > 0:
+        sign = '+' if stress_delta > 0 else ''
+        print(f"→ {action_name}: +{actual_gain} points, Stress {sign}{stress_delta}")
+    else:
+        sign = '+' if stress_delta > 0 else ''
+        print(f"→ {action_name}: Stress {sign}{stress_delta}")
+
+    return scores, new_stress
+
+# ---------- Main Game Logic ----------
+def main():
+    # Initialize player state
+    scores = { subject: 0 for subject in SCORE_CAP }
+    stress = 0
+
+    # Welcome message and rules
+    print("Welcome to the Gaokao Simulator!")
+    print(f"Rules: {TOTAL_ROUNDS} rounds, {CHOICES_PER_ROUND} actions per round.")
+    print(f"Score ≥ {UNIVERSITY_THRESHOLD}: Go to university; otherwise: Work a job.")
+    print(f"Stress ≥ {STRESS_MAX}: Burnout and game over.\n")
+
+    # Each round
+    for rnd in range(1, TOTAL_ROUNDS + 1):
+        display_status(rnd, scores, stress)
+
+        # Each action within the round
+        for _ in range(CHOICES_PER_ROUND):
+            list_actions()
+            choice = get_player_choice()
+            if not choice:
+                print("→ Invalid choice, action skipped.")
+            else:
+                scores, stress = apply_action(choice, scores, stress)
+
+            # Check for burnout
+            if stress >= STRESS_MAX:
+                print("\n Stress too high! Burnout and game over.")
+                return
+
+    # End-of-game summary
+    final_score = sum(scores.values())
+    print("\n—— Game Over ——")
+    print(f"Final Score: {final_score}    Final Stress: {stress}")
+    if final_score >= UNIVERSITY_THRESHOLD:
+        print(" Congratulations! You pass the Gaokao and go to university!")
+    else:
+        print(" Score insufficient. Time to get a job.")
+
+if __name__ == "__main__":
+    main()
+
